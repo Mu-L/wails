@@ -8,9 +8,11 @@ import (
 	"flag"
 	"fmt"
 	iofs "io/fs"
+	"net"
 	"net/url"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/assetserver"
 
@@ -40,7 +42,9 @@ func (a *App) Run() error {
 func CreateApp(appoptions *options.App) (*App, error) {
 	var err error
 
-	ctx := context.WithValue(context.Background(), "debug", true)
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, "debug", true)
+	ctx = context.WithValue(ctx, "devtoolsEnabled", true)
 
 	// Set up logger
 	myLogger := logger.New(appoptions.Logger)
@@ -71,7 +75,7 @@ func CreateApp(appoptions *options.App) (*App, error) {
 
 	loglevel := os.Getenv("loglevel")
 	if loglevel == "" {
-		loglevelFlag = devFlags.String("loglevel", "debug", "Loglevel to use - Trace, Debug, Info, Warning, Error")
+		loglevelFlag = devFlags.String("loglevel", appoptions.LogLevel.String(), "Loglevel to use - Trace, Debug, Info, Warning, Error")
 	}
 
 	// If we weren't given the assetdir in the environment variables
@@ -87,8 +91,15 @@ func CreateApp(appoptions *options.App) (*App, error) {
 		if frontendDevServerURLFlag != nil {
 			frontendDevServerURL = *frontendDevServerURLFlag
 		}
-		if loglevelFlag != nil {
-			loglevel = *loglevelFlag
+		// Only override LogLevel if the flag was explicitly set
+		if loglevelFlag != nil && devFlags.Lookup("loglevel").Value.String() != appoptions.LogLevel.String() {
+			loggerLevel, err := pkglogger.StringToLogLevel(*loglevelFlag)
+			if err != nil {
+				return nil, err
+			}
+			if loggerLevel != appoptions.LogLevel {
+				myLogger.SetLogLevel(loggerLevel)
+			}
 		}
 	}
 
@@ -104,17 +115,33 @@ func CreateApp(appoptions *options.App) (*App, error) {
 	}
 
 	if frontendDevServerURL != "" {
-		if devServer == "" {
-			return nil, fmt.Errorf("Unable to use FrontendDevServerUrl without a DevServer address")
+		_, port, err := net.SplitHostPort(devServer)
+		if err != nil {
+			return nil, fmt.Errorf("unable to determine port of DevServer: %s", err)
 		}
 
-		startURL, err := url.Parse("http://" + devServer)
+		ctx = context.WithValue(ctx, "assetserverport", port)
+
+		ctx = context.WithValue(ctx, "frontenddevserverurl", frontendDevServerURL)
+
+		externalURL, err := url.Parse(frontendDevServerURL)
 		if err != nil {
 			return nil, err
 		}
 
-		ctx = context.WithValue(ctx, "starturl", startURL)
-		ctx = context.WithValue(ctx, "frontenddevserverurl", frontendDevServerURL)
+		if externalURL.Host == "" {
+			return nil, fmt.Errorf("Invalid frontend:dev:serverUrl missing protocol scheme?")
+		}
+
+		waitCb := func() { myLogger.Debug("Waiting for frontend DevServer '%s' to be ready", externalURL) }
+		if !checkPortIsOpen(externalURL.Host, time.Minute, waitCb) {
+			myLogger.Error("Timeout waiting for frontend DevServer")
+		}
+
+		handler := assetserver.NewExternalAssetsHandler(myLogger, assetConfig, externalURL)
+		assetConfig.Assets = nil
+		assetConfig.Handler = handler
+		assetConfig.Middleware = nil
 
 		myLogger.Info("Serving assets from frontend DevServer URL: %s", frontendDevServerURL)
 	} else {
@@ -149,14 +176,6 @@ func CreateApp(appoptions *options.App) (*App, error) {
 		ctx = context.WithValue(ctx, "devserver", devServer)
 	}
 
-	if loglevel != "" {
-		level, err := pkglogger.StringToLogLevel(loglevel)
-		if err != nil {
-			return nil, err
-		}
-		myLogger.SetLogLevel(level)
-	}
-
 	// Attach logger to context
 	ctx = context.WithValue(ctx, "logger", myLogger)
 	ctx = context.WithValue(ctx, "buildtype", "dev")
@@ -189,11 +208,11 @@ func CreateApp(appoptions *options.App) (*App, error) {
 		appoptions.OnDomReady,
 		appoptions.OnBeforeClose,
 	}
-	appBindings := binding.NewBindings(myLogger, appoptions.Bind, bindingExemptions, false)
+	appBindings := binding.NewBindings(myLogger, appoptions.Bind, bindingExemptions, false, appoptions.EnumBind)
 
 	eventHandler := runtime.NewEvents(myLogger)
 	ctx = context.WithValue(ctx, "events", eventHandler)
-	messageDispatcher := dispatcher.NewDispatcher(ctx, myLogger, appBindings, eventHandler)
+	messageDispatcher := dispatcher.NewDispatcher(ctx, myLogger, appBindings, eventHandler, appoptions.ErrorFormatter)
 
 	// Create the frontends and register to event handler
 	desktopFrontend := desktop.NewFrontend(ctx, appoptions, myLogger, appBindings, messageDispatcher)
@@ -210,6 +229,7 @@ func CreateApp(appoptions *options.App) (*App, error) {
 		startupCallback:  appoptions.OnStartup,
 		shutdownCallback: appoptions.OnShutdown,
 		debug:            true,
+		devtoolsEnabled:  true,
 	}
 
 	result.options = appoptions
@@ -245,4 +265,23 @@ func tryInferAssetDirFromFS(assets iofs.FS) (string, error) {
 	}
 
 	return path, nil
+}
+
+func checkPortIsOpen(host string, timeout time.Duration, waitCB func()) (ret bool) {
+	if timeout == 0 {
+		timeout = time.Minute
+	}
+
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		conn, _ := net.DialTimeout("tcp", host, 2*time.Second)
+		if conn != nil {
+			conn.Close()
+			return true
+		}
+
+		waitCB()
+		time.Sleep(1 * time.Second)
+	}
+	return false
 }
