@@ -18,10 +18,13 @@ class Page(HTMLParser):
         self.ids = set()
         self.links = []
         self.source = ""
+        self.unrendered_d2 = False
         self.feed(path.read_text(encoding="utf-8"))
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
+        if tag == "code" and "language-d2" in attrs.get("class", "").split():
+            self.unrendered_d2 = True
         if "id" in attrs:
             self.ids.add(attrs["id"])
         if tag == "html":
@@ -54,6 +57,8 @@ def check_page(page, site, repository, errors):
     relative = page.path.relative_to(site).as_posix()
     if not page.lang:
         errors.append(relative + ": missing language")
+    if page.unrendered_d2:
+        errors.append(relative + ": D2 diagram was displayed as source code")
     if relative == "404.html":
         return
     expected = "https://v3.wails.io" + route(page.path, site)

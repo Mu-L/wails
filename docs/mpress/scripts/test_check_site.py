@@ -57,6 +57,14 @@ class SiteChecks(unittest.TestCase):
         check_page(page, self.site, self.repository, errors)
         self.assertEqual(len(errors), 2)
 
+    def test_unrendered_d2_is_rejected(self):
+        page = self.page("index.html", '<html lang="en">'
+                         '<link rel="canonical" href="https://v3.wails.io/">'
+                         '<pre><code class="language-d2">a -&gt; b</code></pre>')
+        errors = []
+        check_page(page, self.site, self.repository, errors)
+        self.assertEqual(errors, ["index.html: D2 diagram was displayed as source code"])
+
 
 if __name__ == "__main__":
     unittest.main()
