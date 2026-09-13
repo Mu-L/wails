@@ -17,11 +17,11 @@ and create a branch from `master`.
 Install the pinned documentation generator:
 
 ```sh
-go install github.com/leaanthony/mpress/cmd/mpress@v1.0.1
+go install github.com/leaanthony/mpress/cmd/mpress@v1.0.3
 ```
 
 You can also download a verified binary from the
-[M-Press v1.0.1 release](https://github.com/leaanthony/mpress/releases/tag/v1.0.1).
+[M-Press v1.0.3 release](https://github.com/leaanthony/mpress/releases/tag/v1.0.3).
 
 From the Wails repository root:
 

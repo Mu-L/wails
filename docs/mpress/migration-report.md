@@ -33,8 +33,8 @@ imports the current editable Starlight source instead.
   for the home-page animation; mobile branding and search hit areas are repaired.
 - Diagram rendering is checked separately from source preservation: all 110 D2
   blocks across 32 pages must become working SVG images. The site validator
-  rejects D2 displayed as a code block. M-Press v1.0.1 does not render D2; the
-  deployment pin must move to the release containing the D2 renderer fix.
+  rejects D2 displayed as a code block. Builds use M-Press v1.0.3, which embeds
+  D2 and renders these blocks to static SVG without an external installation.
 
 The Starlight source and existing production deployment remain available for
 rollback. Before production cutover, reconcile later source changes, update

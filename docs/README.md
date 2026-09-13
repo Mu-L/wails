@@ -8,11 +8,11 @@ documentation-only correction.
 
 ## Preview and validate
 
-Install [M-Press v1.0.1](https://github.com/leaanthony/mpress/releases/tag/v1.0.1)
+Install [M-Press v1.0.3](https://github.com/leaanthony/mpress/releases/tag/v1.0.3)
 from a release archive, or use Go:
 
 ```sh
-go install github.com/leaanthony/mpress/cmd/mpress@v1.0.1
+go install github.com/leaanthony/mpress/cmd/mpress@v1.0.3
 ```
 
 From the repository root:
@@ -39,7 +39,7 @@ services, or a translation provider.
 ## Cloudflare build
 
 Run `bash docs/mpress/scripts/build.sh` on Linux AMD64 to execute the exact CI
-build: download M-Press v1.0.1, verify its pinned SHA-256 digest, build, and check.
+build: download M-Press v1.0.3, verify its pinned SHA-256 digest, build, and check.
 The output is a static directory suitable for Cloudflare Pages Direct Upload.
 
 The `Wails v3 documentation` workflow validates PRs without deployment secrets.
