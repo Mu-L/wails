@@ -24,6 +24,7 @@ After processing, the content will be moved to the main changelog and this file 
 
 ## Fixed
 <!-- Bug fixes -->
+- Parse JSON slug values from MPD frontmatter for changelog generation in [PR](https://github.com/wailsapp/wails/pull/6118) by @leaanthony
 - Updater clears helper env vars and relaunches original target after backup failures in [PR](https://github.com/wailsapp/wails/pull/6080) by @cnmax
 - Start default signal handler during App.Run in [PR](https://github.com/wailsapp/wails/pull/6098) by @leaanthony
 - Windows menu handles nil menus, frees replaced resources, and redraws the menu bar in [PR](https://github.com/wailsapp/wails/pull/6112) by @taliesin-ai
