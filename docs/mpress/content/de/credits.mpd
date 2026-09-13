@@ -17,17 +17,8 @@ sourcePath = "de/credits.mpd"
 ## Sponsoren
 
 @rawHTML
-<object
-@end
-  type="image/svg+xml"\
-  data="https://wails.io/img/sponsors.svg"\
-  aria-label="Sponsoren"\
-  style="margin: auto; width: 100%; max-width: 800px"
->
-  @rawHTML
+<object type="image/svg+xml" data="https://wails.io/img/sponsors.svg" aria-label="Sponsoren" style="margin: auto; width: 100%; max-width: 800px" >
   <img src="https://wails.io/img/sponsors.svg" alt="Sponsoren" style="width: 100%" />
-  @end
-@rawHTML
 </object>
 @end
 Besonderer Dank:
@@ -47,17 +38,8 @@ Besonderer Dank:
 ## Mitwirkende
 
 @rawHTML
-<object
-@end
-  type="image/svg+xml"\
-  data="https://wails.io/img/contributors.svg"\
-  aria-label="Wails contributors"\
-  style="margin: auto; width: 100%; max-width: 800px"
->
-  @rawHTML
+<object type="image/svg+xml" data="https://wails.io/img/contributors.svg" aria-label="Wails contributors" style="margin: auto; width: 100%; max-width: 800px" >
   <img src="https://wails.io/img/contributors.svg" alt="Wails contributors" style="width: 100%" />
-  @end
-@rawHTML
 </object>
 @end
 

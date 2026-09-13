@@ -17,17 +17,8 @@ sourcePath = "ru/credits.mpd"
 ## Спонсоры
 
 @rawHTML
-<object
-@end
-  type="image/svg+xml"\
-  data="https://wails.io/img/sponsors.svg"\
-  aria-label="Sponsors"\
-  style="margin: auto; width: 100%; max-width: 800px"
->
-  @rawHTML
+<object type="image/svg+xml" data="https://wails.io/img/sponsors.svg" aria-label="Sponsors" style="margin: auto; width: 100%; max-width: 800px" >
   <img src="https://wails.io/img/sponsors.svg" alt="Sponsors" style="width: 100%" />
-  @end
-@rawHTML
 </object>
 @end
 Особая благодарность:
@@ -47,17 +38,8 @@ sourcePath = "ru/credits.mpd"
 ## Участники
 
 @rawHTML
-<object
-@end
-  type="image/svg+xml"\
-  data="https://wails.io/img/contributors.svg"\
-  aria-label="Wails contributors"\
-  style="margin: auto; width: 100%; max-width: 800px"
->
-  @rawHTML
+<object type="image/svg+xml" data="https://wails.io/img/contributors.svg" aria-label="Wails contributors" style="margin: auto; width: 100%; max-width: 800px" >
   <img src="https://wails.io/img/contributors.svg" alt="Wails contributors" style="width: 100%" />
-  @end
-@rawHTML
 </object>
 @end
 
