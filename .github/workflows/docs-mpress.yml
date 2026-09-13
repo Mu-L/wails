@@ -2,9 +2,9 @@ name: Wails v3 documentation
 
 on:
   pull_request:
-    paths: ['docs/mpress/**', 'mpress.yaml', '.github/workflows/docs-mpress.yml', 'v3/scripts/*changelog*', 'v3/tasks/release/**']
+    paths: ['docs/mpress/**', 'mpress.yaml', '.github/workflows/docs-mpress.yml', '.github/workflows/auto-changelog-v3.yml', 'v3/scripts/*changelog*', 'v3/tasks/release/**']
   push:
-    paths: ['docs/mpress/**', 'mpress.yaml', '.github/workflows/docs-mpress.yml', 'v3/scripts/*changelog*', 'v3/tasks/release/**']
+    paths: ['docs/mpress/**', 'mpress.yaml', '.github/workflows/docs-mpress.yml', '.github/workflows/auto-changelog-v3.yml', 'v3/scripts/*changelog*', 'v3/tasks/release/**']
   workflow_dispatch:
 
 permissions:
