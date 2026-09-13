@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -120,17 +122,17 @@ func TestDocumentationURLForFile(t *testing.T) {
 	}{
 		{
 			name: "regular page",
-			file: "docs/src/content/docs/features/windows/options.mdx",
+			file: "docs/mpress/content/features/windows/options.mpd",
 			want: "https://v3.wails.io/features/windows/options",
 		},
 		{
 			name: "index page",
-			file: "docs/src/content/docs/guides/mobile/index.mdx",
+			file: "docs/mpress/content/guides/mobile/index.mpd",
 			want: "https://v3.wails.io/guides/mobile",
 		},
 		{
 			name: "localized page",
-			file: "docs/src/content/docs/de/quick-start/installation.mdx",
+			file: "docs/mpress/content/de/quick-start/installation.mpd",
 			want: "https://v3.wails.io/de/quick-start/installation",
 		},
 	}
@@ -149,7 +151,7 @@ func TestDocumentationURLForFile(t *testing.T) {
 }
 
 func TestDocumentationURLForSlug(t *testing.T) {
-	got, err := documentationURLFromPath("docs/src/content/docs/blog/legacy-name.md", "blog/the-road-to-wails-v3")
+	got, err := documentationURLFromPath("docs/mpress/content/blog/legacy-name.mpd", "blog/the-road-to-wails-v3")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -159,11 +161,37 @@ func TestDocumentationURLForSlug(t *testing.T) {
 }
 
 func TestDocumentationURLForMissingFile(t *testing.T) {
-	got, err := documentationURLForFile("docs/src/content/docs/removed-by-pr.mdx")
+	got, err := documentationURLForFile("docs/mpress/content/removed-by-pr.mpd")
 	if err != nil {
 		t.Fatal(err)
 	}
 	if got != "" {
 		t.Fatalf("documentationURLForFile() = %q, want empty URL for a missing file", got)
+	}
+}
+
+func TestMPDFrontmatterSlug(t *testing.T) {
+	file := filepath.Join(t.TempDir(), "page.mpd")
+	if err := os.WriteFile(file, []byte("---\nschema = 1\nslug = \"guides/custom-route\" # route override\n---\nBody"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	slug, err := readFrontmatterSlug(file)
+	if err != nil || slug != "guides/custom-route" {
+		t.Fatalf("slug = %q, err = %v", slug, err)
+	}
+}
+
+func TestLocalizedMPDSlug(t *testing.T) {
+	got, err := documentationURLFromPath("docs/mpress/content/id/contributing/index.mpd", "contributing")
+	if err != nil || got != "https://v3.wails.io/id/contributing" {
+		t.Fatalf("URL = %q, err = %v", got, err)
+	}
+}
+
+func TestDocumentationIgnoresRollbackAndNonPages(t *testing.T) {
+	for _, file := range []string{"docs/src/content/docs/guide.mdx", "docs/mpress/content/changelog.mpd", "docs/mpress/content/image.svg"} {
+		if isDocumentationPage(file) {
+			t.Errorf("%s must not produce a release-note documentation link", file)
+		}
 	}
 }

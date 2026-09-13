@@ -16,12 +16,14 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/BurntSushi/toml"
 )
 
 const changelogPath = "v3/UNRELEASED_CHANGELOG.md"
 
 const (
-	docsContentPrefix = "docs/src/content/docs/"
+	docsContentPrefix = "docs/mpress/content/"
 	docsSiteURL       = "https://v3.wails.io"
 )
 
@@ -254,7 +256,7 @@ func isDocumentationPage(file string) bool {
 		return false
 	}
 	base := path.Base(file)
-	return base != "changelog.md" && base != "changelog.mdx"
+	return path.Ext(base) == ".mpd" && base != "changelog.mpd"
 }
 
 func documentationURLForFile(file string) (string, error) {
@@ -282,7 +284,15 @@ func documentationURLFromPath(file, slug string) (string, error) {
 
 	relative := strings.TrimPrefix(file, docsContentPrefix)
 	if slug != "" {
+		localized := strings.SplitN(relative, "/", 2)[0]
 		relative = strings.TrimPrefix(slug, "/")
+		// These locale prefixes match the published M-Press configuration.
+		switch localized {
+		case "zh-cn", "zh-tw", "ja", "ko", "ru", "fr", "pt", "de", "id":
+			if relative != localized && !strings.HasPrefix(relative, localized+"/") {
+				relative = localized + "/" + relative
+			}
+		}
 	} else {
 		ext := path.Ext(relative)
 		relative = strings.TrimSuffix(relative, ext)
@@ -313,11 +323,13 @@ func readFrontmatterSlug(file string) (string, error) {
 		return "", nil
 	}
 	frontmatter := content[3 : end+3]
-	match := regexp.MustCompile(`(?m)^slug:\s*["']?([^"'\n]+?)["']?\s*$`).FindStringSubmatch(frontmatter)
-	if len(match) == 2 {
-		return strings.TrimSpace(match[1]), nil
+	var metadata struct {
+		Slug string `toml:"slug"`
 	}
-	return "", nil
+	if _, err := toml.Decode(frontmatter, &metadata); err != nil {
+		return "", fmt.Errorf("parse MPD metadata in %s: %w", file, err)
+	}
+	return metadata.Slug, nil
 }
 
 func appendDocumentationLinks(entry string, docURLs []string) string {

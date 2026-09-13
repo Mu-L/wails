@@ -29,10 +29,9 @@ MPD keeps headings, paragraphs, lists and fenced code readable. Preserve its
 `---` metadata block and matching `@...` / `@end` component boundaries. See
 https://github.com/leaanthony/mpress for the authoring reference.
 
-During migration, `docs/src/content/docs/` remains the Starlight rollback source.
+`docs/src/content/docs/` remains the Starlight rollback source.
 The M-Press site is built from `docs/mpress/content/`; do not edit generated
-`docs/mpress/site/` files. Before production cutover, recheck changes to the
-Starlight source since the recorded migration commit.
+`docs/mpress/site/` files.
 
 Wails code contributions and feature proposals retain the project's existing
 rules; this guide applies to documentation corrections.

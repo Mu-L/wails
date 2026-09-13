@@ -286,7 +286,7 @@ _/
 ## Diperbaiki
 - Sanitize Info.plist template stubs during build-assets update in [PR](https://github.com/wailsapp/wails/pull/5312) oleh @leaanthony
 - Perbaiki stale state in macOS menus by applying the menu item mutators (`setMenuItemChecked()`, `setMenuItemLabel()`, `setMenuItemDisabled()`, `setMenuItemHidden()`, `setMenuItemTooltip()`) synchronously on the main thread, eliminating the `dispatch_async` race that left menus rendering the previous state when reopened quickly (#5002)
-- Ignore __test.go files in dev mode to prevent tidak perlu rebuilds in [PR](https://github.com/wailsapp/wails/pull/5203) oleh @leaanthony
+- Ignore `*_test.go` files in dev mode to prevent tidak perlu rebuilds in [PR](https://github.com/wailsapp/wails/pull/5203) oleh @leaanthony
 - Prevent Menu.Update() segfault when app is not running in [PR](https://github.com/wailsapp/wails/pull/5291) oleh @wucm667
 - Use lastSizeWParam to gate menubar redraws di Windows in [PR](https://github.com/wailsapp/wails/pull/5382) oleh @taliesin-ai
 
@@ -345,7 +345,7 @@ _/
 ## Diperbaiki
 - Guard WebView2 focus operations against nil controller state in [PR](https://github.com/wailsapp/wails/pull/5315) oleh @leaanthony
 - Perbarui GitHub Actions workflow to correctly reference PR base branch in [PR](https://github.com/wailsapp/wails/pull/5313) oleh @leaanthony
-- Ignore __test.go files in dev mode to prevent tidak perlu rebuilds in [PR](https://github.com/wailsapp/wails/pull/5203) oleh @leaanthony
+- Ignore `*_test.go` files in dev mode to prevent tidak perlu rebuilds in [PR](https://github.com/wailsapp/wails/pull/5203) oleh @leaanthony
 - Prevent Menu.Update() segfault when app is not running in [PR](https://github.com/wailsapp/wails/pull/5291) oleh @wucm667
 
 ## v3.0.0-alpha.83 - 2026-05-02

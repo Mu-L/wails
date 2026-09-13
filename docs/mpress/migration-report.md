@@ -36,10 +36,9 @@ imports the current editable Starlight source instead.
   rejects D2 displayed as a code block. Builds use M-Press v1.0.3, which embeds
   D2 and renders these blocks to static SVG without an external installation.
 
-The Starlight source and existing production deployment remain available for
-rollback. Before production cutover, reconcile later source changes, update
-documentation-producing automation, and configure the protected Cloudflare
-deployment environment described in `../README.md`.
+The Starlight source remains available for rollback. Release and changelog
+automation now uses MPD paths. Cloudflare builds production from `master`
+through the existing GitHub integration. See `../README.md` for configuration.
 
 - Source: `./docs`
 - Content source: `docs/src/content/docs`
