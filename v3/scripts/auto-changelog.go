@@ -16,8 +16,6 @@ import (
 	"regexp"
 	"strings"
 	"time"
-
-	"github.com/BurntSushi/toml"
 )
 
 const changelogPath = "v3/UNRELEASED_CHANGELOG.md"
@@ -309,6 +307,8 @@ func documentationURLFromPath(file, slug string) (string, error) {
 	return (&url.URL{Scheme: "https", Host: strings.TrimPrefix(docsSiteURL, "https://"), Path: relative}).String(), nil
 }
 
+var mpdSlugField = regexp.MustCompile(`(?m)^[\t ]*slug[\t ]*=[\t ]*(.*)$`)
+
 func readFrontmatterSlug(file string) (string, error) {
 	data, err := os.ReadFile(file)
 	if err != nil {
@@ -323,13 +323,17 @@ func readFrontmatterSlug(file string) (string, error) {
 		return "", nil
 	}
 	frontmatter := content[3 : end+3]
-	var metadata struct {
-		Slug string `toml:"slug"`
+	// MPD uses key = JSON-value fields, including nested objects that are not
+	// TOML. Only the slug field affects the public route.
+	field := mpdSlugField.FindStringSubmatch(frontmatter)
+	if field == nil {
+		return "", nil
 	}
-	if _, err := toml.Decode(frontmatter, &metadata); err != nil {
+	var slug string
+	if err := json.Unmarshal([]byte(field[1]), &slug); err != nil {
 		return "", fmt.Errorf("parse MPD metadata in %s: %w", file, err)
 	}
-	return metadata.Slug, nil
+	return slug, nil
 }
 
 func appendDocumentationLinks(entry string, docURLs []string) string {

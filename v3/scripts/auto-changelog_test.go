@@ -5,6 +5,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -171,14 +172,52 @@ func TestDocumentationURLForMissingFile(t *testing.T) {
 }
 
 func TestMPDFrontmatterSlug(t *testing.T) {
-	file := filepath.Join(t.TempDir(), "page.mpd")
-	if err := os.WriteFile(file, []byte("---\nschema = 1\nslug = \"guides/custom-route\" # route override\n---\nBody"), 0600); err != nil {
+	tests := []struct {
+		name, fields, want string
+		wantError          bool
+	}{
+		{name: "JSON objects", fields: `banner = {"content":"Welcome"}
+slug = "guides/custom-route"
+hero = {"actions":[{"text":"Start"}]}`, want: "guides/custom-route"},
+		{name: "no override", fields: `hero = {"slug":"not-a-page-route"}`},
+		{name: "JSON escaping", fields: `slug = "guides\u002fcustom-route"`, want: "guides/custom-route"},
+		{name: "invalid type", fields: `slug = {"path":"guide"}`, wantError: true},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			file := filepath.Join(t.TempDir(), "page.mpd")
+			source := "---\nschema = 1\n" + test.fields + "\n---\nBody"
+			if err := os.WriteFile(file, []byte(source), 0600); err != nil {
+				t.Fatal(err)
+			}
+			slug, err := readFrontmatterSlug(file)
+			if (err != nil) != test.wantError || slug != test.want {
+				t.Fatalf("slug = %q, err = %v; want %q, error %v", slug, err, test.want, test.wantError)
+			}
+		})
+	}
+}
+
+func TestDocumentationMetadataCorpus(t *testing.T) {
+	count := 0
+	err := filepath.WalkDir("../../docs/mpress/content", func(file string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() || filepath.Ext(file) != ".mpd" {
+			return nil
+		}
+		count++
+		_, err = readFrontmatterSlug(file)
+		return err
+	})
+	if err != nil {
 		t.Fatal(err)
 	}
-	slug, err := readFrontmatterSlug(file)
-	if err != nil || slug != "guides/custom-route" {
-		t.Fatalf("slug = %q, err = %v", slug, err)
+	if count == 0 {
+		t.Fatal("no documentation pages checked")
 	}
+	t.Logf("checked metadata in %d documentation pages", count)
 }
 
 func TestLocalizedMPDSlug(t *testing.T) {
